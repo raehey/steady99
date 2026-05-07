@@ -1,44 +1,13 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <title>동기부여 명언</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@400;700&family=Gaegu:wght@400;700&family=Jua&family=Do+Hyeon&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-
-  <main id="app">
-    <!-- 두 레이어가 겹치며 교차 전환 (crossfade) -->
-    <div class="layer active" id="layer-a">
-      <p class="quote-text"></p>
-      <span class="quote-author"></span>
-    </div>
-    <div class="layer" id="layer-b">
-      <p class="quote-text"></p>
-      <span class="quote-author"></span>
-    </div>
-  </main>
-
-  <!-- 설정 버튼 (톱니바퀴) -->
-  <button id="settings-btn" class="settings-btn" aria-label="설정">
-    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="12" r="2"/>
-      <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/>
-    </svg>
-  </button>
-
-  <!-- 설정 패널 -->
-  <div id="settings-panel" class="settings-panel">
+<div id="settings-panel" class="settings-panel">
     <div class="settings-content">
       <h2>설정</h2>
 
-      <!-- 글씨체 -->
+      <div class="settings-group">
+        <label>카테고리 필터 (이름을 클릭해서 켜고 끄기)</label>
+        <div id="category-pills" class="category-pills">
+          </div>
+      </div>
+
       <div class="settings-group">
         <label>글씨체</label>
         <div class="font-buttons">
@@ -50,73 +19,5 @@
         </div>
       </div>
 
-      <!-- 배경색 -->
-      <div class="settings-group">
-        <label>배경색</label>
-        <div class="color-buttons bg-colors">
-          <button class="color-btn active" data-color="#000000" style="background: #000000;" title="검정"></button>
-          <button class="color-btn" data-color="#ffffff" style="background: #ffffff; border: 1px solid #ccc;" title="흰색"></button>
-          <button class="color-btn" data-color="#001a4d" style="background: #001a4d;" title="네이비"></button>
-          <button class="color-btn" data-color="#1a3a2a" style="background: #1a3a2a;" title="다크그린"></button>
-          <button class="color-btn" data-color="#3d1a2a" style="background: #3d1a2a;" title="와인"></button>
-          <button class="color-btn" data-color="#2a2a2a" style="background: #2a2a2a;" title="차콜"></button>
-          <button class="color-btn" data-color="#1a2a3d" style="background: #1a2a3d;" title="슬레이트"></button>
-          <button class="color-btn" data-color="#2a1a1a" style="background: #2a1a1a;" title="브라운"></button>
-        </div>
-      </div>
-
-      <!-- 글씨색 -->
-      <div class="settings-group">
-        <label>글씨색</label>
-        <div class="color-buttons text-colors">
-          <button class="color-btn active" data-color="#ffffff" style="background: #ffffff; border: 1px solid #ccc;" title="흰색"></button>
-          <button class="color-btn" data-color="#ffff00" style="background: #ffff00;" title="노랑"></button>
-          <button class="color-btn" data-color="#87ceeb" style="background: #87ceeb;" title="하늘색"></button>
-          <button class="color-btn" data-color="#7fffd4" style="background: #7fffd4;" title="민트"></button>
-          <button class="color-btn" data-color="#ffb6d9" style="background: #ffb6d9;" title="핑크"></button>
-          <button class="color-btn" data-color="#ffd700" style="background: #ffd700;" title="금색"></button>
-          <button class="color-btn" data-color="#ff6b6b" style="background: #ff6b6b;" title="빨강"></button>
-          <button class="color-btn" data-color="#c0c0c0" style="background: #c0c0c0; border: 1px solid #999;" title="은색"></button>
-        </div>
-      </div>
-
-      <!-- 글씨 크기 -->
-      <div class="settings-group">
-        <label>글씨 크기</label>
-        <div class="size-buttons">
-          <button data-size="3" class="size-btn">작게</button>
-          <button data-size="5" class="size-btn active">보통</button>
-          <button data-size="7" class="size-btn">크게</button>
-          <button data-size="9" class="size-btn">아주크게</button>
-        </div>
-      </div>
-
-      <!-- 자동 전환 속도 -->
-      <div class="settings-group">
-        <label>자동 전환 속도</label>
-        <div class="speed-buttons">
-          <button data-speed="5000" class="speed-btn">5초</button>
-          <button data-speed="10000" class="speed-btn">10초</button>
-          <button data-speed="30000" class="speed-btn">30초</button>
-          <button data-speed="60000" class="speed-btn active">1분</button>
-          <button data-speed="300000" class="speed-btn">5분</button>
-        </div>
-      </div>
-
-      <!-- 카테고리 필터 -->
-      <div class="settings-group">
-        <label>카테고리 필터</label>
-        <div class="category-checkboxes">
-          <!-- 동적으로 생성됨 -->
-        </div>
-      </div>
     </div>
   </div>
-
-  <!-- 설정 패널 배경 (backdrop) -->
-  <div id="settings-backdrop" class="settings-backdrop"></div>
-
-  <script src="js/quotes.js"></script>
-  <script src="js/app.js"></script>
-</body>
-</html>
