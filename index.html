@@ -35,7 +35,10 @@
   <!-- 설정 패널 -->
   <div id="settings-panel" class="settings-panel">
     <div class="settings-content">
-      <h2>설정</h2>
+      <div class="settings-header">
+        <h2>설정</h2>
+        <button id="settings-close" class="settings-close">✕</button>
+      </div>
 
       <!-- 카테고리 필터 (맨 위로 이동) -->
       <div class="settings-group">
@@ -61,6 +64,7 @@
       <div class="settings-group">
         <label>글씨체</label>
         <div class="font-buttons">
+          <button data-font="__random__" class="font-btn font-random" id="font-random-btn">🔀 랜덤 자동 변환</button>
           <button data-font="Noto Sans KR" class="font-btn active">기본 (고딕)</button>
           <button data-font="Noto Serif KR" class="font-btn" style="font-family:'Noto Serif KR',serif">세리프 명조</button>
           <button data-font="Black Han Sans" class="font-btn" style="font-family:'Black Han Sans',sans-serif">블랙 한산스</button>
