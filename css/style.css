@@ -29,7 +29,7 @@ html, body {
   cursor: pointer;
 }
 
-/* ── 레이어 (두 장이 겹쳐 있음) ──────────── */
+/* ── 레이어 (크로스페이드) ───────────────── */
 .layer {
   position: absolute;
   top: 0;
@@ -41,7 +41,6 @@ html, body {
   justify-content: center;
   align-items: center;
   padding: 5vw;
-
   opacity: 0;
   transition: opacity 1.2s ease, background-color 0.3s ease;
 }
@@ -175,12 +174,44 @@ html, body {
   margin-bottom: 25px;
 }
 
-.settings-group label {
+.settings-group > label {
   display: block;
   font-size: 14px;
   font-weight: 600;
   margin-bottom: 10px;
   color: #fff;
+}
+
+/* ── 카테고리 토글 버튼 ──────────────────── */
+.category-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cat-toggle {
+  padding: 10px 16px;
+  border: 2px solid #444;
+  background: transparent;
+  color: #888;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.cat-toggle:hover {
+  border-color: #666;
+  color: #bbb;
+}
+
+.cat-toggle.active {
+  background: #4a90e2;
+  border-color: #4a90e2;
+  color: #ffffff;
+  font-weight: 700;
 }
 
 /* ── 글씨체 버튼 ────────────────────────── */
@@ -197,7 +228,7 @@ html, body {
   color: #fff;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   transition: all 0.2s ease;
   text-align: left;
 }
@@ -252,6 +283,7 @@ html, body {
   cursor: pointer;
   font-size: 13px;
   transition: all 0.2s ease;
+  font-family: 'Noto Sans KR', sans-serif;
 }
 
 .size-btn:hover {
@@ -266,11 +298,13 @@ html, body {
 /* ── 속도 버튼 ────────────────────────────── */
 .speed-buttons {
   display: flex;
-  flex-direction: column;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .speed-btn {
+  flex: 1;
+  min-width: 55px;
   padding: 10px;
   border: 1px solid #444;
   background: #2a2a2a;
@@ -279,6 +313,8 @@ html, body {
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s ease;
+  text-align: center;
+  font-family: 'Noto Sans KR', sans-serif;
 }
 
 .speed-btn:hover {
@@ -288,29 +324,4 @@ html, body {
 .speed-btn.active {
   background: #4a90e2;
   border-color: #4a90e2;
-}
-
-/* ── 카테고리 체크박스 ────────────────────── */
-.category-checkboxes {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.checkbox-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.checkbox-item input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-}
-
-.checkbox-item label {
-  margin: 0;
-  font-weight: 400;
-  cursor: pointer;
 }
