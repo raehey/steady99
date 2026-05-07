@@ -43,6 +43,13 @@
 
   var filteredQuotes = [];
   var quoteIndices = [];
+  var randomFont = false;
+  var fontList = [
+    "Noto Sans KR", "Noto Serif KR", "Black Han Sans", "Do Hyeon",
+    "Nanum Brush Script", "Nanum Pen Script", "Gowun Batang",
+    "Dongle", "Gowun Dodum", "Song Myung"
+  ];
+  var fontIndex = 0;
 
   // ── Fisher-Yates Shuffle ──────────────────
   function shuffleArray(arr) {
@@ -96,6 +103,7 @@
         if (loaded.textColor) settings.textColor = loaded.textColor;
         if (loaded.fontSize) settings.fontSize = loaded.fontSize;
         if (loaded.autoSpeed) settings.autoSpeed = loaded.autoSpeed;
+        if (typeof loaded.randomFont === "boolean") randomFont = loaded.randomFont;
         if (loaded.categories) {
           for (var cat in loaded.categories) {
             if (cat in settings.categories) {
@@ -112,7 +120,9 @@
   // ── localStorage 저장 ──────────────────────
   function saveSettings() {
     try {
-      localStorage.setItem("quoteSettings", JSON.stringify(settings));
+      var saveData = JSON.parse(JSON.stringify(settings));
+      saveData.randomFont = randomFont;
+      localStorage.setItem("quoteSettings", JSON.stringify(saveData));
     } catch (e) {
       // 무시
     }
@@ -154,8 +164,13 @@
     }
 
     // 글씨체 적용
-    layer.querySelector(".quote-text").style.fontFamily = "'" + settings.font + "', sans-serif";
-    layer.querySelector(".quote-author").style.fontFamily = "'" + settings.font + "', sans-serif";
+    var currentFont = settings.font;
+    if (randomFont) {
+      currentFont = fontList[fontIndex % fontList.length];
+      fontIndex++;
+    }
+    layer.querySelector(".quote-text").style.fontFamily = "'" + currentFont + "', sans-serif";
+    layer.querySelector(".quote-author").style.fontFamily = "'" + currentFont + "', sans-serif";
   }
 
   // ── 색상 반전 ────────────────────────────
@@ -256,15 +271,52 @@
 
     // ── 글씨체 버튼 ────────────────────────
     var fontButtons = document.querySelectorAll(".font-btn");
+    var fontRandomBtn = document.getElementById("font-random-btn");
+
+    // 랜덤 초기 상태 복원
+    if (randomFont) {
+      fontRandomBtn.classList.add("active");
+    }
+
     for (var fi = 0; fi < fontButtons.length; fi++) {
       (function (btn) {
-        btn.classList.remove("active");
-        if (btn.getAttribute("data-font") === settings.font) {
-          btn.classList.add("active");
+        if (btn.id !== "font-random-btn") {
+          btn.classList.remove("active");
+          if (!randomFont && btn.getAttribute("data-font") === settings.font) {
+            btn.classList.add("active");
+          }
         }
         btn.addEventListener("click", function (e) {
           e.stopPropagation();
-          settings.font = this.getAttribute("data-font");
+          var selectedFont = this.getAttribute("data-font");
+
+          if (selectedFont === "__random__") {
+            // 랜덤 토글
+            randomFont = !randomFont;
+            if (randomFont) {
+              for (var k = 0; k < fontButtons.length; k++) {
+                fontButtons[k].classList.remove("active");
+              }
+              this.classList.add("active");
+              fontIndex = 0;
+            } else {
+              this.classList.remove("active");
+              // 기본 폰트로 복원
+              settings.font = "Noto Sans KR";
+              for (var k = 0; k < fontButtons.length; k++) {
+                if (fontButtons[k].getAttribute("data-font") === settings.font) {
+                  fontButtons[k].classList.add("active");
+                }
+              }
+              applyFont();
+            }
+            saveSettings();
+            return;
+          }
+
+          // 일반 폰트 선택 시 랜덤 해제
+          randomFont = false;
+          settings.font = selectedFont;
           for (var k = 0; k < fontButtons.length; k++) {
             fontButtons[k].classList.remove("active");
           }
@@ -384,6 +436,12 @@
   }, { passive: false });
 
   settingsBackdrop.addEventListener("click", closeSettings);
+
+  var settingsClose = document.getElementById("settings-close");
+  settingsClose.addEventListener("click", function (e) {
+    e.stopPropagation();
+    closeSettings();
+  });
 
   // 설정 패널 내부 클릭/터치 전파 방지
   settingsPanel.addEventListener("click", function (e) { e.stopPropagation(); });
