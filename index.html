@@ -8,13 +8,12 @@
   <title>동기부여 명언</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@400;700&family=Gaegu:wght@400;700&family=Jua&family=Do+Hyeon&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Dongle:wght@400;700&family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Nanum+Brush+Script&family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@700&family=Song+Myung&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
   <main id="app">
-    <!-- 두 레이어가 겹치며 교차 전환 (crossfade) -->
     <div class="layer active" id="layer-a">
       <p class="quote-text"></p>
       <span class="quote-author"></span>
@@ -38,56 +37,11 @@
     <div class="settings-content">
       <h2>설정</h2>
 
-      <!-- 글씨체 -->
+      <!-- 카테고리 필터 (맨 위로 이동) -->
       <div class="settings-group">
-        <label>글씨체</label>
-        <div class="font-buttons">
-          <button data-font="Noto Sans KR" class="font-btn active">기본</button>
-          <button data-font="Noto Serif KR" class="font-btn">명조</button>
-          <button data-font="Gaegu" class="font-btn">손글씨</button>
-          <button data-font="Jua" class="font-btn">둥근</button>
-          <button data-font="Do Hyeon" class="font-btn">도현</button>
-        </div>
-      </div>
-
-      <!-- 배경색 -->
-      <div class="settings-group">
-        <label>배경색</label>
-        <div class="color-buttons bg-colors">
-          <button class="color-btn active" data-color="#000000" style="background: #000000;" title="검정"></button>
-          <button class="color-btn" data-color="#ffffff" style="background: #ffffff; border: 1px solid #ccc;" title="흰색"></button>
-          <button class="color-btn" data-color="#001a4d" style="background: #001a4d;" title="네이비"></button>
-          <button class="color-btn" data-color="#1a3a2a" style="background: #1a3a2a;" title="다크그린"></button>
-          <button class="color-btn" data-color="#3d1a2a" style="background: #3d1a2a;" title="와인"></button>
-          <button class="color-btn" data-color="#2a2a2a" style="background: #2a2a2a;" title="차콜"></button>
-          <button class="color-btn" data-color="#1a2a3d" style="background: #1a2a3d;" title="슬레이트"></button>
-          <button class="color-btn" data-color="#2a1a1a" style="background: #2a1a1a;" title="브라운"></button>
-        </div>
-      </div>
-
-      <!-- 글씨색 -->
-      <div class="settings-group">
-        <label>글씨색</label>
-        <div class="color-buttons text-colors">
-          <button class="color-btn active" data-color="#ffffff" style="background: #ffffff; border: 1px solid #ccc;" title="흰색"></button>
-          <button class="color-btn" data-color="#ffff00" style="background: #ffff00;" title="노랑"></button>
-          <button class="color-btn" data-color="#87ceeb" style="background: #87ceeb;" title="하늘색"></button>
-          <button class="color-btn" data-color="#7fffd4" style="background: #7fffd4;" title="민트"></button>
-          <button class="color-btn" data-color="#ffb6d9" style="background: #ffb6d9;" title="핑크"></button>
-          <button class="color-btn" data-color="#ffd700" style="background: #ffd700;" title="금색"></button>
-          <button class="color-btn" data-color="#ff6b6b" style="background: #ff6b6b;" title="빨강"></button>
-          <button class="color-btn" data-color="#c0c0c0" style="background: #c0c0c0; border: 1px solid #999;" title="은색"></button>
-        </div>
-      </div>
-
-      <!-- 글씨 크기 -->
-      <div class="settings-group">
-        <label>글씨 크기</label>
-        <div class="size-buttons">
-          <button data-size="3" class="size-btn">작게</button>
-          <button data-size="5" class="size-btn active">보통</button>
-          <button data-size="7" class="size-btn">크게</button>
-          <button data-size="9" class="size-btn">아주크게</button>
+        <label>카테고리</label>
+        <div class="category-toggles" id="category-toggles">
+          <!-- 동적으로 생성됨 -->
         </div>
       </div>
 
@@ -103,11 +57,61 @@
         </div>
       </div>
 
-      <!-- 카테고리 필터 -->
+      <!-- 글씨체 -->
       <div class="settings-group">
-        <label>카테고리 필터</label>
-        <div class="category-checkboxes">
-          <!-- 동적으로 생성됨 -->
+        <label>글씨체</label>
+        <div class="font-buttons">
+          <button data-font="Noto Sans KR" class="font-btn active">기본 (고딕)</button>
+          <button data-font="Noto Serif KR" class="font-btn" style="font-family:'Noto Serif KR',serif">세리프 명조</button>
+          <button data-font="Black Han Sans" class="font-btn" style="font-family:'Black Han Sans',sans-serif">블랙 한산스</button>
+          <button data-font="Do Hyeon" class="font-btn" style="font-family:'Do Hyeon',sans-serif">도현</button>
+          <button data-font="Nanum Brush Script" class="font-btn" style="font-family:'Nanum Brush Script',cursive">나눔 붓글씨</button>
+          <button data-font="Nanum Pen Script" class="font-btn" style="font-family:'Nanum Pen Script',cursive">나눔 펜글씨</button>
+          <button data-font="Gowun Batang" class="font-btn" style="font-family:'Gowun Batang',serif">고운 바탕</button>
+          <button data-font="Dongle" class="font-btn" style="font-family:'Dongle',sans-serif">동글</button>
+          <button data-font="Gowun Dodum" class="font-btn" style="font-family:'Gowun Dodum',sans-serif">고운 도둠</button>
+          <button data-font="Song Myung" class="font-btn" style="font-family:'Song Myung',serif">송명</button>
+        </div>
+      </div>
+
+      <!-- 배경색 -->
+      <div class="settings-group">
+        <label>배경색</label>
+        <div class="color-buttons bg-colors">
+          <button class="color-btn active" data-color="#000000" style="background:#000000;" title="검정"></button>
+          <button class="color-btn" data-color="#ffffff" style="background:#ffffff; border:1px solid #ccc;" title="흰색"></button>
+          <button class="color-btn" data-color="#001a4d" style="background:#001a4d;" title="네이비"></button>
+          <button class="color-btn" data-color="#1a3a2a" style="background:#1a3a2a;" title="다크그린"></button>
+          <button class="color-btn" data-color="#3d1a2a" style="background:#3d1a2a;" title="와인"></button>
+          <button class="color-btn" data-color="#2a2a2a" style="background:#2a2a2a;" title="차콜"></button>
+          <button class="color-btn" data-color="#1a2a3d" style="background:#1a2a3d;" title="슬레이트"></button>
+          <button class="color-btn" data-color="#2a1a1a" style="background:#2a1a1a;" title="브라운"></button>
+        </div>
+      </div>
+
+      <!-- 글씨색 -->
+      <div class="settings-group">
+        <label>글씨색</label>
+        <div class="color-buttons text-colors">
+          <button class="color-btn active" data-color="#ffffff" style="background:#ffffff; border:1px solid #ccc;" title="흰색"></button>
+          <button class="color-btn" data-color="#ffff00" style="background:#ffff00;" title="노랑"></button>
+          <button class="color-btn" data-color="#87ceeb" style="background:#87ceeb;" title="하늘색"></button>
+          <button class="color-btn" data-color="#7fffd4" style="background:#7fffd4;" title="민트"></button>
+          <button class="color-btn" data-color="#ffb6d9" style="background:#ffb6d9;" title="핑크"></button>
+          <button class="color-btn" data-color="#ffd700" style="background:#ffd700;" title="금색"></button>
+          <button class="color-btn" data-color="#ff6b6b" style="background:#ff6b6b;" title="빨강"></button>
+          <button class="color-btn" data-color="#c0c0c0" style="background:#c0c0c0; border:1px solid #999;" title="은색"></button>
+        </div>
+      </div>
+
+      <!-- 글씨 크기 -->
+      <div class="settings-group">
+        <label>글씨 크기</label>
+        <div class="size-buttons">
+          <button data-size="3" class="size-btn">작게</button>
+          <button data-size="5" class="size-btn active">보통</button>
+          <button data-size="7" class="size-btn">크게</button>
+          <button data-size="9" class="size-btn">아주크게</button>
         </div>
       </div>
     </div>
