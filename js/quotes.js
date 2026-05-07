@@ -456,4 +456,3 @@ const quotes = [
   { text: "당신은 그럴 자격이 있다", author: "", category: "인생어록" }
 ];
 
-export default quotes;
