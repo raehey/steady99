@@ -205,12 +205,12 @@
     }
   }
 
-  // ── 크로스페이드 전환 ─────────────────────
-  function nextQuote() {
+  // ── 크로스페이드 전환 (공통) ───────────────
+  function transitionTo(newIndex) {
     if (isAnimating) return;
     isAnimating = true;
 
-    current += 1;
+    current = newIndex;
     isDark = !isDark;
 
     fillLayer(hiddenLayer, current, isDark);
@@ -225,6 +225,18 @@
     setTimeout(function () {
       isAnimating = false;
     }, FADE_DURATION);
+  }
+
+  function nextQuote() {
+    transitionTo(current + 1);
+  }
+
+  function prevQuote() {
+    var newIndex = current - 1;
+    if (newIndex < 0) {
+      newIndex = quoteIndices.length - 1;
+    }
+    transitionTo(newIndex);
   }
 
   // ── 자동 전환 타이머 ──────────────────────
@@ -412,20 +424,68 @@
     }
   }
 
+  // ── 스와이프 감지 상태 ────────────────────
+  var swipeStartX = null;
+  var swipeStartY = null;
+  var swipeStartTime = 0;
+  var SWIPE_THRESHOLD = 50;   // 최소 스와이프 거리 (px)
+  var SWIPE_MAX_TIME = 500;   // 최대 스와이프 시간 (ms)
+
   // ── 이벤트 바인딩 ─────────────────────────
   document.addEventListener("click", function (e) {
     if (!settingsPanel.contains(e.target) && !settingsBtn.contains(e.target)) {
-      nextQuote();
+      // 클릭 위치 기반: 화면 중앙(window.innerWidth / 2) 기준
+      if (e.clientX >= window.innerWidth / 2) {
+        nextQuote();
+      } else {
+        prevQuote();
+      }
       resetAutoTimer();
     }
   });
 
   document.addEventListener("touchstart", function (e) {
-    if (!settingsPanel.contains(e.target) && !settingsBtn.contains(e.target)) {
-      e.preventDefault();
-      nextQuote();
+    if (settingsPanel.contains(e.target) || settingsBtn.contains(e.target)) return;
+    e.preventDefault();
+    var touch = e.touches[0];
+    swipeStartX = touch.clientX;
+    swipeStartY = touch.clientY;
+    swipeStartTime = Date.now();
+  }, { passive: false });
+
+  document.addEventListener("touchend", function (e) {
+    if (settingsPanel.contains(e.target) || settingsBtn.contains(e.target)) return;
+    if (swipeStartX === null) return;
+
+    var touch = e.changedTouches[0];
+    var dx = touch.clientX - swipeStartX;
+    var dy = touch.clientY - swipeStartY;
+    var elapsed = Date.now() - swipeStartTime;
+
+    swipeStartX = null;
+    swipeStartY = null;
+
+    // 스와이프 판정: 가로 이동이 충분하고, 세로보다 크고, 시간 내에 완료
+    if (elapsed < SWIPE_MAX_TIME && Math.abs(dx) > SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy)) {
+      if (dx < 0) {
+        // 왼쪽 스와이프 → 다음 명언
+        nextQuote();
+      } else {
+        // 오른쪽 스와이프 → 이전 명언
+        prevQuote();
+      }
       resetAutoTimer();
+      return;
     }
+
+    // 스와이프가 아닌 일반 탭 → 터치 위치 기반 처리
+    // 화면 중앙(window.innerWidth / 2) 기준: 오른쪽 = 다음, 왼쪽 = 이전
+    if (swipeStartX >= window.innerWidth / 2) {
+      nextQuote();
+    } else {
+      prevQuote();
+    }
+    resetAutoTimer();
   }, { passive: false });
 
   settingsBtn.addEventListener("click", toggleSettings);
@@ -463,6 +523,13 @@
       requestWakeLock();
     }
   });
+
+  // ── Service Worker 등록 (오프라인 모드) ───
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js").catch(function () {
+      // 등록 실패 시 무시 (오프라인 기능만 비활성)
+    });
+  }
 
   // ── 초기화 ────────────────────────────────
   initializeCategories();
