@@ -28,6 +28,26 @@
     </div>
   </main>
 
+  <!-- 즐겨찾기 하트 애니메이션 -->
+  <div id="heart-anim" class="heart-anim" aria-hidden="true">♥</div>
+  <div id="heart-remove-anim" class="heart-anim heart-remove" aria-hidden="true">♡</div>
+
+  <!-- 명언 카운터 -->
+  <div id="quote-counter" class="quote-counter" style="display:none;"></div>
+
+  <!-- 시계 표시 -->
+  <div id="clock-display" class="clock-display" style="display:none;"></div>
+
+  <!-- 공유 버튼 -->
+  <button id="share-btn" class="share-btn" style="display:none;" aria-label="공유">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/>
+    </svg>
+  </button>
+
+  <!-- 토스트 알림 -->
+  <div id="toast" class="toast" aria-live="polite"></div>
+
   <!-- 설정 버튼 (톱니바퀴) -->
   <button id="settings-btn" class="settings-btn" aria-label="설정">
     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -64,6 +84,48 @@
         </div>
       </div>
 
+      <!-- 시계 표시 토글 -->
+      <div class="settings-group">
+        <label>시계 표시</label>
+        <div class="toggle-buttons">
+          <button id="clock-toggle" class="toggle-btn" data-setting="clock">OFF</button>
+        </div>
+      </div>
+
+      <!-- 명언 카운터 토글 -->
+      <div class="settings-group">
+        <label>명언 카운터</label>
+        <div class="toggle-buttons">
+          <button id="counter-toggle" class="toggle-btn" data-setting="counter">OFF</button>
+        </div>
+      </div>
+
+      <!-- 즐겨찾기만 보기 토글 -->
+      <div class="settings-group">
+        <label>즐겨찾기만 보기</label>
+        <div class="toggle-buttons">
+          <button id="favorites-toggle" class="toggle-btn" data-setting="favorites">OFF</button>
+        </div>
+      </div>
+
+      <!-- 공유 버튼 표시 토글 -->
+      <div class="settings-group">
+        <label>공유 버튼</label>
+        <div class="toggle-buttons">
+          <button id="share-toggle" class="toggle-btn" data-setting="share">OFF</button>
+        </div>
+      </div>
+
+      <!-- 전환 효과 -->
+      <div class="settings-group">
+        <label>전환 효과</label>
+        <div class="transition-buttons">
+          <button data-transition="fade" class="transition-btn active">페이드</button>
+          <button data-transition="slide" class="transition-btn">슬라이드</button>
+          <button data-transition="zoom" class="transition-btn">줌</button>
+        </div>
+      </div>
+
       <!-- 글씨체 -->
       <div class="settings-group">
         <label>글씨체</label>
@@ -94,6 +156,21 @@
           <button class="color-btn" data-color="#2a2a2a" style="background:#2a2a2a;" title="차콜"></button>
           <button class="color-btn" data-color="#1a2a3d" style="background:#1a2a3d;" title="슬레이트"></button>
           <button class="color-btn" data-color="#2a1a1a" style="background:#2a1a1a;" title="브라운"></button>
+        </div>
+      </div>
+
+      <!-- 그라디언트 배경 -->
+      <div class="settings-group">
+        <label>그라디언트 배경</label>
+        <div class="gradient-buttons" id="gradient-buttons">
+          <button class="gradient-btn active" data-gradient="none" title="없음">없음</button>
+          <button class="gradient-btn" data-gradient="neon" style="background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);" title="네온 그라디언트"></button>
+          <button class="gradient-btn" data-gradient="aurora" style="background:linear-gradient(135deg,#0a1628,#1a4a3a,#0a3d6b);" title="오로라"></button>
+          <button class="gradient-btn" data-gradient="sunset" style="background:linear-gradient(135deg,#1a0a2e,#3d1a1a,#4a2a0a);" title="선셋"></button>
+          <button class="gradient-btn" data-gradient="ocean" style="background:linear-gradient(135deg,#0a0a2e,#0a2a4a,#0a1a3d);" title="오션"></button>
+          <button class="gradient-btn" data-gradient="forest" style="background:linear-gradient(135deg,#0a1a0a,#1a2a1a,#0a2a1a);" title="포레스트"></button>
+          <button class="gradient-btn" data-gradient="midnight" style="background:linear-gradient(135deg,#020111,#1a1a2e,#16222a);" title="미드나잇"></button>
+          <button class="gradient-btn" data-gradient="wine" style="background:linear-gradient(135deg,#1a0a0a,#3d1a2a,#2a0a1a);" title="와인"></button>
         </div>
       </div>
 

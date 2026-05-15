@@ -3,7 +3,7 @@
  * 모든 앱 에셋을 캐시하여 인터넷 없이 동작하도록 지원
  */
 
-var CACHE_NAME = "steady99-v1";
+var CACHE_NAME = "steady99-v7";
 
 var ASSETS_TO_CACHE = [
   "./",
