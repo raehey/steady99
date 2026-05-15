@@ -38,6 +38,19 @@
   <!-- 시계 표시 -->
   <div id="clock-display" class="clock-display" style="display:none;"></div>
 
+  <!-- 즐겨찾기 하트 버튼 (왼쪽 상단) -->
+  <button id="heart-btn" class="heart-btn" style="display:none;" aria-label="즐겨찾기">
+    <span id="heart-icon" class="heart-icon">♡</span>
+  </button>
+
+  <!-- 캡처 버튼 (왼쪽 하단) -->
+  <button id="capture-btn" class="capture-btn" style="display:none;" aria-label="캡처">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+      <circle cx="12" cy="13" r="4"/>
+    </svg>
+  </button>
+
   <!-- 공유 버튼 -->
   <button id="share-btn" class="share-btn" style="display:none;" aria-label="공유">
     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -84,11 +97,44 @@
         </div>
       </div>
 
-      <!-- 시계 표시 토글 -->
+      <!-- 시계 표시 토글 & 상세 설정 -->
       <div class="settings-group">
         <label>시계 표시</label>
         <div class="toggle-buttons">
           <button id="clock-toggle" class="toggle-btn" data-setting="clock">OFF</button>
+        </div>
+        <!-- 시계 추가 설정 (clock ON일 때만 표시) -->
+        <div id="clock-options" style="display:none; margin-top:15px; border-top:1px solid #444; padding-top:15px;">
+          <div style="margin-bottom:12px;">
+            <label style="font-size:13px; margin-bottom:8px; display:block;">크기</label>
+            <div class="clock-size-buttons">
+              <button data-clock-size="1" class="clock-option-btn">1vw</button>
+              <button data-clock-size="2" class="clock-option-btn active">2vw</button>
+              <button data-clock-size="3" class="clock-option-btn">3vw</button>
+              <button data-clock-size="4" class="clock-option-btn">4vw</button>
+            </div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:13px; margin-bottom:8px; display:block;">위치</label>
+            <div class="clock-position-buttons">
+              <button data-clock-position="top-left" class="clock-option-btn">상단좌</button>
+              <button data-clock-position="top-center" class="clock-option-btn">상단중</button>
+              <button data-clock-position="top-right" class="clock-option-btn">상단우</button>
+              <button data-clock-position="bottom-left" class="clock-option-btn">하단좌</button>
+              <button data-clock-position="bottom-center" class="clock-option-btn active">하단중</button>
+              <button data-clock-position="bottom-right" class="clock-option-btn">하단우</button>
+            </div>
+          </div>
+          <div>
+            <label style="font-size:13px; margin-bottom:8px; display:block;">투명도</label>
+            <div class="clock-opacity-buttons">
+              <button data-clock-opacity="10" class="clock-option-btn">10%</button>
+              <button data-clock-opacity="20" class="clock-option-btn">20%</button>
+              <button data-clock-opacity="30" class="clock-option-btn">30%</button>
+              <button data-clock-opacity="50" class="clock-option-btn">50%</button>
+              <button data-clock-opacity="15" class="clock-option-btn active">15% (기본)</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -100,11 +146,27 @@
         </div>
       </div>
 
-      <!-- 즐겨찾기만 보기 토글 -->
+      <!-- 즐겨찾기만 보기 토글 & 카운트 -->
       <div class="settings-group">
-        <label>즐겨찾기만 보기</label>
+        <label>즐겨찾기만 보기 <span id="favorites-count" style="font-size:12px; color:#888; margin-left:5px;"></span></label>
         <div class="toggle-buttons">
           <button id="favorites-toggle" class="toggle-btn" data-setting="favorites">OFF</button>
+        </div>
+      </div>
+
+      <!-- 캡처 버튼 표시 토글 -->
+      <div class="settings-group">
+        <label>캡처 버튼</label>
+        <div class="toggle-buttons">
+          <button id="capture-toggle" class="toggle-btn" data-setting="capture">OFF</button>
+        </div>
+      </div>
+
+      <!-- 즐겨찾기 버튼 표시 토글 -->
+      <div class="settings-group">
+        <label>즐겨찾기 버튼</label>
+        <div class="toggle-buttons">
+          <button id="heart-toggle" class="toggle-btn" data-setting="heart">OFF</button>
         </div>
       </div>
 
@@ -204,6 +266,9 @@
 
   <!-- 설정 패널 배경 (backdrop) -->
   <div id="settings-backdrop" class="settings-backdrop"></div>
+
+  <!-- html2canvas CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <script src="js/quotes.js"></script>
   <script src="js/app.js"></script>
