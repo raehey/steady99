@@ -29,7 +29,7 @@ html, body {
   cursor: pointer;
 }
 
-/* ── 레이어 (크로스페이드) ───────────────── */
+/* ── 레이어 (크로스페이드 기본) ──────────── */
 .layer {
   position: absolute;
   top: 0;
@@ -47,6 +47,53 @@ html, body {
 
 .layer.active {
   opacity: 1;
+}
+
+/* ── 슬라이드 전환 ──────────────────────── */
+.transition-slide .layer {
+  opacity: 0;
+  transform: translateX(100%);
+  transition: opacity 1.2s ease, transform 1.2s ease, background-color 0.3s ease;
+}
+
+.transition-slide .layer.active {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.transition-slide .layer.slide-out-left {
+  opacity: 0;
+  transform: translateX(-100%);
+}
+
+.transition-slide .layer.slide-out-right {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+.transition-slide .layer.slide-in-left {
+  transform: translateX(-100%);
+}
+
+.transition-slide .layer.slide-in-right {
+  transform: translateX(100%);
+}
+
+/* ── 줌 전환 ────────────────────────────── */
+.transition-zoom .layer {
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 1.2s ease, transform 1.2s ease, background-color 0.3s ease;
+}
+
+.transition-zoom .layer.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.transition-zoom .layer.zoom-out {
+  opacity: 0;
+  transform: scale(1.5);
 }
 
 /* ── 색상 테마 ───────────────────────────── */
@@ -306,6 +353,49 @@ html, body {
   box-shadow: 0 0 8px rgba(74, 144, 226, 0.5);
 }
 
+/* ── 그라디언트 버튼 ────────────────────── */
+.gradient-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.gradient-btn {
+  width: 45px;
+  height: 45px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: transparent;
+  font-size: 0;
+  overflow: hidden;
+}
+
+.gradient-btn[data-gradient="none"] {
+  background: #2a2a2a;
+  color: #888;
+  font-size: 11px;
+  font-family: 'Noto Sans KR', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gradient-btn:hover {
+  transform: scale(1.1);
+}
+
+.gradient-btn.active {
+  border-color: #4a90e2;
+  box-shadow: 0 0 8px rgba(74, 144, 226, 0.5);
+}
+
+.gradient-btn.active[data-gradient="none"] {
+  color: #ffffff;
+  background: #4a90e2;
+}
+
 /* ── 크기 버튼 ────────────────────────────── */
 .size-buttons {
   display: flex;
@@ -363,4 +453,178 @@ html, body {
 .speed-btn.active {
   background: #4a90e2;
   border-color: #4a90e2;
+}
+
+/* ── 전환 효과 버튼 ─────────────────────── */
+.transition-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.transition-btn {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #444;
+  background: #2a2a2a;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  font-family: 'Noto Sans KR', sans-serif;
+  text-align: center;
+}
+
+.transition-btn:hover {
+  background: #333;
+}
+
+.transition-btn.active {
+  background: #4a90e2;
+  border-color: #4a90e2;
+}
+
+/* ── 명언 카운터 ─────────────────────────── */
+.quote-counter {
+  position: fixed;
+  bottom: 10px;
+  left: 15px;
+  font-size: 2vw;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: #ffffff;
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 50;
+  letter-spacing: 0.05em;
+}
+
+/* ── 시계 표시 ───────────────────────────── */
+.clock-display {
+  position: fixed;
+  bottom: 10px;
+  right: 0;
+  left: 0;
+  text-align: center;
+  font-size: 2vw;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: #ffffff;
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 50;
+  letter-spacing: 0.1em;
+}
+
+/* ── 즐겨찾기 하트 애니메이션 ───────────── */
+.heart-anim {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  font-size: 15vw;
+  color: #ff4466;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 80;
+  transition: none;
+}
+
+.heart-anim.heart-remove {
+  color: #888888;
+}
+
+.heart-anim.show {
+  animation: heartPop 0.8s ease forwards;
+}
+
+@keyframes heartPop {
+  0%   { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  30%  { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+  60%  { transform: translate(-50%, -50%) scale(0.95); opacity: 0.6; }
+  100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+}
+
+/* ── ON/OFF 토글 버튼 ────────────────────── */
+.toggle-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.toggle-btn {
+  padding: 10px 20px;
+  border: 1px solid #444;
+  background: #2a2a2a;
+  color: #888;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  font-family: 'Noto Sans KR', sans-serif;
+  min-width: 70px;
+  text-align: center;
+}
+
+.toggle-btn:hover {
+  background: #333;
+}
+
+.toggle-btn.active {
+  background: #4a90e2;
+  border-color: #4a90e2;
+  color: #ffffff;
+}
+
+/* ── 공유 버튼 ──────────────────────────── */
+.share-btn {
+  position: fixed;
+  bottom: 10px;
+  right: 15px;
+  width: 24px;
+  height: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.15;
+  transition: opacity 0.2s ease;
+  z-index: 50;
+  padding: 0;
+}
+
+.share-btn:hover,
+.share-btn:active {
+  opacity: 0.4;
+}
+
+.share-btn svg {
+  width: 100%;
+  height: 100%;
+  stroke: #ffffff;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── 토스트 알림 ────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-family: 'Noto Sans KR', sans-serif;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 90;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
