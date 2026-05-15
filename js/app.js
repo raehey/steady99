@@ -31,6 +31,21 @@
   var autoTimer     = null;
   var FADE_DURATION = 1200;
 
+  // ── 카운터 DOM ────────────────────────────
+  var quoteCounter = document.getElementById("quote-counter");
+
+  // ── 시계 DOM ──────────────────────────────
+  var clockDisplay = document.getElementById("clock-display");
+  var clockTimer = null;
+
+  // ── 즐겨찾기 하트 DOM ─────────────────────
+  var heartAnim = document.getElementById("heart-anim");
+  var heartRemoveAnim = document.getElementById("heart-remove-anim");
+
+  // ── 공유 버튼 & 토스트 DOM ────────────────
+  var shareBtn = document.getElementById("share-btn");
+  var toastEl = document.getElementById("toast");
+
   // ── 설정 상태 ────────────────────────────
   var settings = {
     font: "Noto Sans KR",
@@ -38,7 +53,25 @@
     textColor: "#ffffff",
     fontSize: 5,
     autoSpeed: 60000,
-    categories: {}
+    categories: {},
+    showClock: false,
+    showCounter: false,
+    favoritesOnly: false,
+    showShare: false,
+    gradient: "none",
+    transition: "fade"
+  };
+
+  // ── 그라디언트 프리셋 ───────────────────────
+  var GRADIENT_PRESETS = {
+    none: null,
+    neon: "linear-gradient(135deg, #0f0c29, #302b63, #24243e)",
+    aurora: "linear-gradient(135deg, #0a1628, #1a4a3a, #0a3d6b)",
+    sunset: "linear-gradient(135deg, #1a0a2e, #3d1a1a, #4a2a0a)",
+    ocean: "linear-gradient(135deg, #0a0a2e, #0a2a4a, #0a1a3d)",
+    forest: "linear-gradient(135deg, #0a1a0a, #1a2a1a, #0a2a1a)",
+    midnight: "linear-gradient(135deg, #020111, #1a1a2e, #16222a)",
+    wine: "linear-gradient(135deg, #1a0a0a, #3d1a2a, #2a0a1a)"
   };
 
   var filteredQuotes = [];
@@ -50,6 +83,54 @@
     "Dongle", "Gowun Dodum", "Song Myung"
   ];
   var fontIndex = 0;
+
+  // ── 즐겨찾기 데이터 ──────────────────────
+  var favorites = {};  // key: "text|||author" → true
+
+  function makeQuoteKey(q) {
+    return (q.text || "") + "|||" + (q.author || "");
+  }
+
+  function isFavorite(q) {
+    return favorites[makeQuoteKey(q)] === true;
+  }
+
+  function toggleFavorite(q) {
+    var key = makeQuoteKey(q);
+    if (favorites[key]) {
+      delete favorites[key];
+      return false;
+    } else {
+      favorites[key] = true;
+      return true;
+    }
+  }
+
+  function loadFavorites() {
+    try {
+      var stored = localStorage.getItem("quoteFavorites");
+      if (stored) {
+        favorites = JSON.parse(stored);
+      }
+    } catch (e) {}
+  }
+
+  function saveFavorites() {
+    try {
+      localStorage.setItem("quoteFavorites", JSON.stringify(favorites));
+    } catch (e) {}
+  }
+
+  function showHeartAnimation(added) {
+    var el = added ? heartAnim : heartRemoveAnim;
+    el.classList.remove("show");
+    // Force reflow to restart animation
+    void el.offsetWidth;
+    el.classList.add("show");
+    setTimeout(function () {
+      el.classList.remove("show");
+    }, 850);
+  }
 
   // ── Fisher-Yates Shuffle ──────────────────
   function shuffleArray(arr) {
@@ -67,10 +148,19 @@
   function rebuildFilteredQuotes() {
     filteredQuotes = quotes.filter(function (q) {
       var cat = q.category || "기타";
-      return settings.categories[cat] !== false;
+      if (settings.categories[cat] === false) return false;
+      if (settings.favoritesOnly && !isFavorite(q)) return false;
+      return true;
     });
     if (filteredQuotes.length === 0) {
-      filteredQuotes = quotes.slice();
+      // 즐겨찾기 모드인데 비어있으면 전체 표시
+      filteredQuotes = quotes.filter(function (q) {
+        var cat = q.category || "기타";
+        return settings.categories[cat] !== false;
+      });
+      if (filteredQuotes.length === 0) {
+        filteredQuotes = quotes.slice();
+      }
     }
     var indices = [];
     for (var i = 0; i < filteredQuotes.length; i++) {
@@ -104,6 +194,12 @@
         if (loaded.fontSize) settings.fontSize = loaded.fontSize;
         if (loaded.autoSpeed) settings.autoSpeed = loaded.autoSpeed;
         if (typeof loaded.randomFont === "boolean") randomFont = loaded.randomFont;
+        if (typeof loaded.showClock === "boolean") settings.showClock = loaded.showClock;
+        if (typeof loaded.showCounter === "boolean") settings.showCounter = loaded.showCounter;
+        if (typeof loaded.favoritesOnly === "boolean") settings.favoritesOnly = loaded.favoritesOnly;
+        if (typeof loaded.showShare === "boolean") settings.showShare = loaded.showShare;
+        if (loaded.gradient && GRADIENT_PRESETS.hasOwnProperty(loaded.gradient)) settings.gradient = loaded.gradient;
+        if (loaded.transition && ["fade", "slide", "zoom"].indexOf(loaded.transition) !== -1) settings.transition = loaded.transition;
         if (loaded.categories) {
           for (var cat in loaded.categories) {
             if (cat in settings.categories) {
@@ -155,11 +251,18 @@
     layer.classList.add(dark ? "dark" : "light");
 
     // 커스텀 색상 적용
+    var gradientValue = GRADIENT_PRESETS[settings.gradient];
     if (!dark) {
       layer.style.backgroundColor = settings.bgColor;
+      layer.style.backgroundImage = gradientValue || "none";
       layer.querySelector(".quote-text").style.color = settings.textColor;
     } else {
       layer.style.backgroundColor = invertColor(settings.bgColor);
+      if (gradientValue) {
+        layer.style.backgroundImage = invertGradient(gradientValue);
+      } else {
+        layer.style.backgroundImage = "none";
+      }
       layer.querySelector(".quote-text").style.color = invertColor(settings.textColor);
     }
 
@@ -185,6 +288,13 @@
     }).join("");
   }
 
+  // ── 그라디언트 색상 반전 ──────────────────
+  function invertGradient(gradientStr) {
+    return gradientStr.replace(/#[0-9a-fA-F]{6}/g, function (hex) {
+      return invertColor(hex);
+    });
+  }
+
   // ── 글씨체 적용 ──────────────────────────
   function applyFont() {
     var allTexts = document.querySelectorAll(".quote-text");
@@ -205,30 +315,102 @@
     }
   }
 
-  // ── 크로스페이드 전환 (공통) ───────────────
-  function transitionTo(newIndex) {
+  // ── 전환 효과 적용 ────────────────────────
+  var lastDirection = "next"; // 스와이프/탭 방향 추적
+
+  function applyTransitionMode() {
+    var app = document.getElementById("app");
+    app.classList.remove("transition-slide", "transition-zoom");
+    if (settings.transition === "slide") {
+      app.classList.add("transition-slide");
+    } else if (settings.transition === "zoom") {
+      app.classList.add("transition-zoom");
+    }
+  }
+
+  // ── 크로스페이드/슬라이드/줌 전환 (공통) ──
+  function transitionTo(newIndex, direction) {
     if (isAnimating) return;
     isAnimating = true;
 
+    lastDirection = direction || "next";
     current = newIndex;
     isDark = !isDark;
 
     fillLayer(hiddenLayer, current, isDark);
 
-    hiddenLayer.classList.add("active");
-    activeLayer.classList.remove("active");
+    if (settings.transition === "slide") {
+      // 슬라이드 전환
+      var inFrom = lastDirection === "next" ? "slide-in-right" : "slide-in-left";
+      var outTo = lastDirection === "next" ? "slide-out-left" : "slide-out-right";
 
-    var prevActive = activeLayer;
-    activeLayer = hiddenLayer;
-    hiddenLayer = prevActive;
+      // 시작 위치 설정 (트랜지션 없이)
+      hiddenLayer.style.transition = "none";
+      hiddenLayer.classList.remove("active", "slide-out-left", "slide-out-right", "slide-in-left", "slide-in-right");
+      hiddenLayer.classList.add(inFrom);
 
-    setTimeout(function () {
-      isAnimating = false;
-    }, FADE_DURATION);
+      // Force reflow
+      void hiddenLayer.offsetWidth;
+
+      // 트랜지션 복원 후 애니메이션
+      hiddenLayer.style.transition = "";
+      hiddenLayer.classList.remove(inFrom);
+      hiddenLayer.classList.add("active");
+
+      activeLayer.classList.remove("active");
+      activeLayer.classList.add(outTo);
+
+      var prevActive = activeLayer;
+      activeLayer = hiddenLayer;
+      hiddenLayer = prevActive;
+
+      setTimeout(function () {
+        hiddenLayer.classList.remove("slide-out-left", "slide-out-right", "slide-in-left", "slide-in-right");
+        isAnimating = false;
+      }, FADE_DURATION);
+
+    } else if (settings.transition === "zoom") {
+      // 줌 전환
+      hiddenLayer.style.transition = "none";
+      hiddenLayer.classList.remove("active", "zoom-out");
+
+      // Force reflow
+      void hiddenLayer.offsetWidth;
+
+      hiddenLayer.style.transition = "";
+      hiddenLayer.classList.add("active");
+
+      activeLayer.classList.remove("active");
+      activeLayer.classList.add("zoom-out");
+
+      var prevActive = activeLayer;
+      activeLayer = hiddenLayer;
+      hiddenLayer = prevActive;
+
+      setTimeout(function () {
+        hiddenLayer.classList.remove("zoom-out");
+        isAnimating = false;
+      }, FADE_DURATION);
+
+    } else {
+      // 페이드 (기본)
+      hiddenLayer.classList.add("active");
+      activeLayer.classList.remove("active");
+
+      var prevActive = activeLayer;
+      activeLayer = hiddenLayer;
+      hiddenLayer = prevActive;
+
+      setTimeout(function () {
+        isAnimating = false;
+      }, FADE_DURATION);
+    }
+
+    updateCounter();
   }
 
   function nextQuote() {
-    transitionTo(current + 1);
+    transitionTo(current + 1, "next");
   }
 
   function prevQuote() {
@@ -236,7 +418,7 @@
     if (newIndex < 0) {
       newIndex = quoteIndices.length - 1;
     }
-    transitionTo(newIndex);
+    transitionTo(newIndex, "prev");
   }
 
   // ── 자동 전환 타이머 ──────────────────────
@@ -360,6 +542,27 @@
       })(bgColorButtons[bi]);
     }
 
+    // ── 그라디언트 버튼 ──────────────────────
+    var gradientButtons = document.querySelectorAll(".gradient-btn");
+    for (var gi = 0; gi < gradientButtons.length; gi++) {
+      (function (btn) {
+        btn.classList.remove("active");
+        if (btn.getAttribute("data-gradient") === settings.gradient) {
+          btn.classList.add("active");
+        }
+        btn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          settings.gradient = this.getAttribute("data-gradient");
+          for (var k = 0; k < gradientButtons.length; k++) {
+            gradientButtons[k].classList.remove("active");
+          }
+          this.classList.add("active");
+          fillLayer(activeLayer, current, isDark);
+          saveSettings();
+        });
+      })(gradientButtons[gi]);
+    }
+
     // ── 글씨색 버튼 ────────────────────────
     var textColorButtons = document.querySelectorAll(".text-colors .color-btn");
     for (var ti = 0; ti < textColorButtons.length; ti++) {
@@ -402,6 +605,89 @@
       })(sizeButtons[si]);
     }
 
+    // ── 시계 표시 토글 ────────────────────────
+    var clockToggle = document.getElementById("clock-toggle");
+    if (settings.showClock) {
+      clockToggle.classList.add("active");
+      clockToggle.textContent = "ON";
+    }
+    clockToggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+      settings.showClock = !settings.showClock;
+      this.classList.toggle("active");
+      this.textContent = settings.showClock ? "ON" : "OFF";
+      applyClock();
+      saveSettings();
+    });
+
+    // ── 명언 카운터 토글 ──────────────────────
+    var counterToggle = document.getElementById("counter-toggle");
+    if (settings.showCounter) {
+      counterToggle.classList.add("active");
+      counterToggle.textContent = "ON";
+    }
+    counterToggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+      settings.showCounter = !settings.showCounter;
+      this.classList.toggle("active");
+      this.textContent = settings.showCounter ? "ON" : "OFF";
+      applyCounter();
+      saveSettings();
+    });
+
+    // ── 즐겨찾기만 보기 토글 ────────────────
+    var favoritesToggle = document.getElementById("favorites-toggle");
+    if (settings.favoritesOnly) {
+      favoritesToggle.classList.add("active");
+      favoritesToggle.textContent = "ON";
+    }
+    favoritesToggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+      settings.favoritesOnly = !settings.favoritesOnly;
+      this.classList.toggle("active");
+      this.textContent = settings.favoritesOnly ? "ON" : "OFF";
+      rebuildFilteredQuotes();
+      fillLayer(activeLayer, current, isDark);
+      updateCounter();
+      saveSettings();
+    });
+
+    // ── 공유 버튼 표시 토글 ────────────────────
+    var shareToggle = document.getElementById("share-toggle");
+    if (settings.showShare) {
+      shareToggle.classList.add("active");
+      shareToggle.textContent = "ON";
+    }
+    shareToggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+      settings.showShare = !settings.showShare;
+      this.classList.toggle("active");
+      this.textContent = settings.showShare ? "ON" : "OFF";
+      applyShare();
+      saveSettings();
+    });
+
+    // ── 전환 효과 버튼 ────────────────────────
+    var transitionButtons = document.querySelectorAll(".transition-btn");
+    for (var tri = 0; tri < transitionButtons.length; tri++) {
+      (function (btn) {
+        btn.classList.remove("active");
+        if (btn.getAttribute("data-transition") === settings.transition) {
+          btn.classList.add("active");
+        }
+        btn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          settings.transition = this.getAttribute("data-transition");
+          for (var k = 0; k < transitionButtons.length; k++) {
+            transitionButtons[k].classList.remove("active");
+          }
+          this.classList.add("active");
+          applyTransitionMode();
+          saveSettings();
+        });
+      })(transitionButtons[tri]);
+    }
+
     // ── 속도 버튼 ──────────────────────────
     var speedButtons = document.querySelectorAll(".speed-btn");
     for (var spi = 0; spi < speedButtons.length; spi++) {
@@ -424,12 +710,125 @@
     }
   }
 
+  // ── 시계 표시 ─────────────────────────────
+  function updateClock() {
+    var now = new Date();
+    var h = now.getHours();
+    var m = now.getMinutes();
+    clockDisplay.textContent =
+      (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m;
+  }
+
+  function applyClock() {
+    if (settings.showClock) {
+      clockDisplay.style.display = "block";
+      updateClock();
+      clearInterval(clockTimer);
+      clockTimer = setInterval(updateClock, 10000);
+    } else {
+      clockDisplay.style.display = "none";
+      clearInterval(clockTimer);
+    }
+  }
+
+  // ── 명언 카운터 ───────────────────────────
+  function updateCounter() {
+    if (!settings.showCounter) return;
+    var displayNum = current + 1;
+    var total = filteredQuotes.length;
+    quoteCounter.textContent = displayNum + " / " + total;
+  }
+
+  function applyCounter() {
+    if (settings.showCounter) {
+      quoteCounter.style.display = "block";
+      updateCounter();
+    } else {
+      quoteCounter.style.display = "none";
+    }
+  }
+
+  // ── 토스트 알림 ────────────────────────────
+  var toastTimer = null;
+  function showToast(msg) {
+    clearTimeout(toastTimer);
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove("show");
+    }, 1800);
+  }
+
+  // ── 공유 기능 ─────────────────────────────
+  function getCurrentQuote() {
+    if (quoteIndices.length === 0 || filteredQuotes.length === 0) return null;
+    var quoteIndex = quoteIndices[current % quoteIndices.length];
+    return filteredQuotes[quoteIndex] || null;
+  }
+
+  function shareQuote() {
+    var q = getCurrentQuote();
+    if (!q) return;
+    var shareText = q.text + (q.author ? "\n— " + q.author : "");
+
+    if (navigator.share) {
+      navigator.share({
+        text: shareText
+      }).catch(function () {
+        // 사용자가 취소한 경우 무시
+      });
+    } else {
+      // 폴백: 클립보드에 복사
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareText).then(function () {
+          showToast("클립보드에 복사되었습니다");
+        }).catch(function () {
+          showToast("복사에 실패했습니다");
+        });
+      } else {
+        // 구형 브라우저 폴백
+        var ta = document.createElement("textarea");
+        ta.value = shareText;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand("copy");
+          showToast("클립보드에 복사되었습니다");
+        } catch (e) {
+          showToast("복사에 실패했습니다");
+        }
+        document.body.removeChild(ta);
+      }
+    }
+  }
+
+  function applyShare() {
+    shareBtn.style.display = settings.showShare ? "block" : "none";
+  }
+
+  shareBtn.addEventListener("click", function (e) {
+    e.stopPropagation();
+    shareQuote();
+  });
+  shareBtn.addEventListener("touchstart", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    shareQuote();
+  }, { passive: false });
+
   // ── 스와이프 감지 상태 ────────────────────
   var swipeStartX = null;
   var swipeStartY = null;
   var swipeStartTime = 0;
   var SWIPE_THRESHOLD = 50;   // 최소 스와이프 거리 (px)
   var SWIPE_MAX_TIME = 500;   // 최대 스와이프 시간 (ms)
+
+  // ── 롱프레스 감지 상태 ────────────────────
+  var longPressTimer = null;
+  var longPressFired = false;
+  var LONG_PRESS_DURATION = 800;  // ms
 
   // ── 이벤트 바인딩 ─────────────────────────
   document.addEventListener("click", function (e) {
@@ -451,10 +850,57 @@
     swipeStartX = touch.clientX;
     swipeStartY = touch.clientY;
     swipeStartTime = Date.now();
+
+    // 롱프레스 타이머 시작
+    longPressFired = false;
+    clearTimeout(longPressTimer);
+    longPressTimer = setTimeout(function () {
+      longPressFired = true;
+      // 현재 명언 즐겨찾기 토글
+      if (quoteIndices.length === 0 || filteredQuotes.length === 0) return;
+      var quoteIndex = quoteIndices[current % quoteIndices.length];
+      var q = filteredQuotes[quoteIndex];
+      if (!q) return;
+      var added = toggleFavorite(q);
+      saveFavorites();
+      showHeartAnimation(added);
+      // 즐겨찾기 모드 중 해제 시 리빌드
+      if (settings.favoritesOnly && !added) {
+        rebuildFilteredQuotes();
+        fillLayer(activeLayer, current, isDark);
+        updateCounter();
+      }
+    }, LONG_PRESS_DURATION);
   }, { passive: false });
+
+  document.addEventListener("touchmove", function (e) {
+    if (longPressTimer && swipeStartX !== null) {
+      var touch = e.touches[0];
+      var dx = Math.abs(touch.clientX - swipeStartX);
+      var dy = Math.abs(touch.clientY - swipeStartY);
+      // 움직임이 크면 롱프레스 취소
+      if (dx > 15 || dy > 15) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+    }
+  }, { passive: true });
 
   document.addEventListener("touchend", function (e) {
     if (settingsPanel.contains(e.target) || settingsBtn.contains(e.target)) return;
+
+    // 롱프레스 타이머 정리
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+
+    // 롱프레스가 발동했으면 네비게이션 스킵
+    if (longPressFired) {
+      longPressFired = false;
+      swipeStartX = null;
+      swipeStartY = null;
+      return;
+    }
+
     if (swipeStartX === null) return;
 
     var touch = e.changedTouches[0];
@@ -462,6 +908,7 @@
     var dy = touch.clientY - swipeStartY;
     var elapsed = Date.now() - swipeStartTime;
 
+    var savedStartX = swipeStartX;
     swipeStartX = null;
     swipeStartY = null;
 
@@ -480,7 +927,7 @@
 
     // 스와이프가 아닌 일반 탭 → 터치 위치 기반 처리
     // 화면 중앙(window.innerWidth / 2) 기준: 오른쪽 = 다음, 왼쪽 = 이전
-    if (swipeStartX >= window.innerWidth / 2) {
+    if (savedStartX >= window.innerWidth / 2) {
       nextQuote();
     } else {
       prevQuote();
@@ -533,12 +980,17 @@
 
   // ── 초기화 ────────────────────────────────
   initializeCategories();
+  loadFavorites();
   loadSettings();
   rebuildFilteredQuotes();
   initializeSettingsUI();
   applyFont();
   applyFontSize();
+  applyTransitionMode();
   fillLayer(activeLayer, current, isDark);
+  applyClock();
+  applyCounter();
+  applyShare();
   requestWakeLock();
   resetAutoTimer();
 })();
