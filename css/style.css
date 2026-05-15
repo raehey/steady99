@@ -501,17 +501,100 @@ html, body {
 /* ── 시계 표시 ───────────────────────────── */
 .clock-display {
   position: fixed;
-  bottom: 10px;
-  right: 0;
-  left: 0;
-  text-align: center;
-  font-size: 2vw;
   font-family: 'Noto Sans KR', sans-serif;
   color: #ffffff;
-  opacity: 0.15;
   pointer-events: none;
   z-index: 50;
   letter-spacing: 0.1em;
+  font-size: 2vw;
+  opacity: 0.15;
+  /* 기본값: 하단중앙 */
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* 시계 위치 클래스 */
+.clock-display.top-left {
+  top: 10px;
+  bottom: auto;
+  left: 10px;
+  right: auto;
+  transform: none;
+}
+
+.clock-display.top-center {
+  top: 10px;
+  bottom: auto;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
+
+.clock-display.top-right {
+  top: 10px;
+  bottom: auto;
+  left: auto;
+  right: 10px;
+  transform: none;
+}
+
+.clock-display.bottom-left {
+  bottom: 10px;
+  top: auto;
+  left: 10px;
+  right: auto;
+  transform: none;
+}
+
+.clock-display.bottom-center {
+  bottom: 10px;
+  top: auto;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
+
+.clock-display.bottom-right {
+  bottom: 10px;
+  top: auto;
+  left: auto;
+  right: 10px;
+  transform: none;
+}
+
+/* ── 시계 옵션 버튼 ─────────────────────── */
+.clock-size-buttons,
+.clock-position-buttons,
+.clock-opacity-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.clock-option-btn {
+  padding: 8px 12px;
+  border: 1px solid #444;
+  background: #2a2a2a;
+  color: #888;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  font-family: 'Noto Sans KR', sans-serif;
+  flex: 1;
+  min-width: 60px;
+  text-align: center;
+}
+
+.clock-option-btn:hover {
+  background: #333;
+}
+
+.clock-option-btn.active {
+  background: #4a90e2;
+  border-color: #4a90e2;
+  color: #ffffff;
 }
 
 /* ── 즐겨찾기 하트 애니메이션 ───────────── */
@@ -571,6 +654,66 @@ html, body {
   background: #4a90e2;
   border-color: #4a90e2;
   color: #ffffff;
+}
+
+/* ── 하트 버튼 (즐겨찾기) ──────────────────── */
+.heart-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: 30px;
+  height: 30px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.15;
+  transition: opacity 0.2s ease;
+  z-index: 50;
+  padding: 0;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heart-btn:hover {
+  opacity: 0.4;
+}
+
+.heart-icon {
+  transition: color 0.2s ease;
+  color: #ffffff;
+}
+
+/* ── 캡처 버튼 ──────────────────────────── */
+.capture-btn {
+  position: fixed;
+  bottom: 10px;
+  left: 15px;
+  width: 24px;
+  height: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.15;
+  transition: opacity 0.2s ease;
+  z-index: 50;
+  padding: 0;
+}
+
+.capture-btn:hover,
+.capture-btn:active {
+  opacity: 0.4;
+}
+
+.capture-btn svg {
+  width: 100%;
+  height: 100%;
+  stroke: #ffffff;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* ── 공유 버튼 ──────────────────────────── */
