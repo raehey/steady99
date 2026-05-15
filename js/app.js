@@ -46,6 +46,14 @@
   var shareBtn = document.getElementById("share-btn");
   var toastEl = document.getElementById("toast");
 
+  // ── 하트 버튼 & 캡처 버튼 DOM ──────────────
+  var heartBtn = document.getElementById("heart-btn");
+  var heartIcon = document.getElementById("heart-icon");
+  var captureBtn = document.getElementById("capture-btn");
+
+  // ── 즐겨찾기 카운트 DOM ───────────────────
+  var favoritesCount = document.getElementById("favorites-count");
+
   // ── 설정 상태 ────────────────────────────
   var settings = {
     font: "Noto Sans KR",
@@ -58,8 +66,13 @@
     showCounter: false,
     favoritesOnly: false,
     showShare: false,
+    showCapture: false,
+    showHeart: false,
     gradient: "none",
-    transition: "fade"
+    transition: "fade",
+    clockSize: 2,
+    clockPosition: "bottom-center",
+    clockOpacity: 15
   };
 
   // ── 그라디언트 프리셋 ───────────────────────
@@ -198,8 +211,13 @@
         if (typeof loaded.showCounter === "boolean") settings.showCounter = loaded.showCounter;
         if (typeof loaded.favoritesOnly === "boolean") settings.favoritesOnly = loaded.favoritesOnly;
         if (typeof loaded.showShare === "boolean") settings.showShare = loaded.showShare;
+        if (typeof loaded.showCapture === "boolean") settings.showCapture = loaded.showCapture;
+        if (typeof loaded.showHeart === "boolean") settings.showHeart = loaded.showHeart;
         if (loaded.gradient && GRADIENT_PRESETS.hasOwnProperty(loaded.gradient)) settings.gradient = loaded.gradient;
         if (loaded.transition && ["fade", "slide", "zoom"].indexOf(loaded.transition) !== -1) settings.transition = loaded.transition;
+        if (loaded.clockSize) settings.clockSize = loaded.clockSize;
+        if (loaded.clockPosition) settings.clockPosition = loaded.clockPosition;
+        if (loaded.clockOpacity) settings.clockOpacity = loaded.clockOpacity;
         if (loaded.categories) {
           for (var cat in loaded.categories) {
             if (cat in settings.categories) {
@@ -407,6 +425,7 @@
     }
 
     updateCounter();
+    updateHeartIcon();
   }
 
   function nextQuote() {
@@ -607,18 +626,84 @@
 
     // ── 시계 표시 토글 ────────────────────────
     var clockToggle = document.getElementById("clock-toggle");
+    var clockOptions = document.getElementById("clock-options");
     if (settings.showClock) {
       clockToggle.classList.add("active");
       clockToggle.textContent = "ON";
+      clockOptions.style.display = "block";
     }
     clockToggle.addEventListener("click", function (e) {
       e.stopPropagation();
       settings.showClock = !settings.showClock;
       this.classList.toggle("active");
       this.textContent = settings.showClock ? "ON" : "OFF";
+      clockOptions.style.display = settings.showClock ? "block" : "none";
       applyClock();
       saveSettings();
     });
+
+    // ── 시계 크기 버튼 ────────────────────────
+    var clockSizeButtons = document.querySelectorAll(".clock-size-buttons .clock-option-btn");
+    for (var csi = 0; csi < clockSizeButtons.length; csi++) {
+      (function (btn) {
+        btn.classList.remove("active");
+        if (parseInt(btn.getAttribute("data-clock-size")) === settings.clockSize) {
+          btn.classList.add("active");
+        }
+        btn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          settings.clockSize = parseInt(this.getAttribute("data-clock-size"));
+          for (var k = 0; k < clockSizeButtons.length; k++) {
+            clockSizeButtons[k].classList.remove("active");
+          }
+          this.classList.add("active");
+          applyClock();
+          saveSettings();
+        });
+      })(clockSizeButtons[csi]);
+    }
+
+    // ── 시계 위치 버튼 ────────────────────────
+    var clockPositionButtons = document.querySelectorAll(".clock-position-buttons .clock-option-btn");
+    for (var cpi = 0; cpi < clockPositionButtons.length; cpi++) {
+      (function (btn) {
+        btn.classList.remove("active");
+        if (btn.getAttribute("data-clock-position") === settings.clockPosition) {
+          btn.classList.add("active");
+        }
+        btn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          settings.clockPosition = this.getAttribute("data-clock-position");
+          for (var k = 0; k < clockPositionButtons.length; k++) {
+            clockPositionButtons[k].classList.remove("active");
+          }
+          this.classList.add("active");
+          applyClock();
+          saveSettings();
+        });
+      })(clockPositionButtons[cpi]);
+    }
+
+    // ── 시계 투명도 버튼 ───────────────────────
+    var clockOpacityButtons = document.querySelectorAll(".clock-opacity-buttons .clock-option-btn");
+    for (var coi = 0; coi < clockOpacityButtons.length; coi++) {
+      (function (btn) {
+        btn.classList.remove("active");
+        if (parseInt(btn.getAttribute("data-clock-opacity")) === settings.clockOpacity) {
+          btn.classList.add("active");
+        }
+        btn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          settings.clockOpacity = parseInt(this.getAttribute("data-clock-opacity"));
+          for (var k = 0; k < clockOpacityButtons.length; k++) {
+            clockOpacityButtons[k].classList.remove("active");
+          }
+          this.classList.add("active");
+          applyClock();
+          saveSettings();
+        });
+      })(clockOpacityButtons[coi]);
+    }
 
     // ── 명언 카운터 토글 ──────────────────────
     var counterToggle = document.getElementById("counter-toggle");
@@ -641,14 +726,51 @@
       favoritesToggle.classList.add("active");
       favoritesToggle.textContent = "ON";
     }
+    updateFavoritesCount();
     favoritesToggle.addEventListener("click", function (e) {
       e.stopPropagation();
+      var favCount = Object.keys(favorites).length;
+      if (!settings.favoritesOnly && favCount === 0) {
+        showToast("즐겨찾기한 명언이 없습니다");
+        return;
+      }
       settings.favoritesOnly = !settings.favoritesOnly;
       this.classList.toggle("active");
       this.textContent = settings.favoritesOnly ? "ON" : "OFF";
       rebuildFilteredQuotes();
       fillLayer(activeLayer, current, isDark);
       updateCounter();
+      saveSettings();
+    });
+
+    // ── 캡처 버튼 표시 토글 ──────────────────────
+    var captureToggle = document.getElementById("capture-toggle");
+    if (settings.showCapture) {
+      captureToggle.classList.add("active");
+      captureToggle.textContent = "ON";
+    }
+    captureToggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+      settings.showCapture = !settings.showCapture;
+      this.classList.toggle("active");
+      this.textContent = settings.showCapture ? "ON" : "OFF";
+      applyCaptureBtn();
+      saveSettings();
+    });
+
+    // ── 즐겨찾기 버튼 표시 토글 ───────────────
+    var heartToggle = document.getElementById("heart-toggle");
+    if (settings.showHeart) {
+      heartToggle.classList.add("active");
+      heartToggle.textContent = "ON";
+    }
+    heartToggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+      settings.showHeart = !settings.showHeart;
+      this.classList.toggle("active");
+      this.textContent = settings.showHeart ? "ON" : "OFF";
+      applyHeart();
+      updateHeartIcon();
       saveSettings();
     });
 
@@ -722,6 +844,11 @@
   function applyClock() {
     if (settings.showClock) {
       clockDisplay.style.display = "block";
+      clockDisplay.style.fontSize = settings.clockSize + "vw";
+      clockDisplay.style.opacity = (settings.clockOpacity / 100).toString();
+      // 위치 클래스 갱신
+      clockDisplay.classList.remove("top-left", "top-center", "top-right", "bottom-left", "bottom-center", "bottom-right");
+      clockDisplay.classList.add(settings.clockPosition);
       updateClock();
       clearInterval(clockTimer);
       clockTimer = setInterval(updateClock, 10000);
@@ -808,6 +935,90 @@
     shareBtn.style.display = settings.showShare ? "block" : "none";
   }
 
+  // ── 하트 버튼 표시 & 상태 업데이트 ─────────
+  function applyHeart() {
+    heartBtn.style.display = settings.showHeart ? "block" : "none";
+  }
+
+  function updateHeartIcon() {
+    if (!settings.showHeart) return;
+    var q = getCurrentQuote();
+    if (!q) return;
+    var isFav = isFavorite(q);
+    heartIcon.textContent = isFav ? "♥" : "♡";
+    if (isFav) {
+      heartIcon.style.color = "#ff4466";
+    } else {
+      heartIcon.style.color = "#ffffff";
+    }
+  }
+
+  // ── 캡처 기능 ───────────────────────────────
+  function applyCaptureBtn() {
+    captureBtn.style.display = settings.showCapture ? "block" : "none";
+  }
+
+  function captureQuote() {
+    if (!window.html2canvas) {
+      showToast("캡처 라이브러리 로딩 중...");
+      return;
+    }
+
+    // 캡처 버튼 숨기기
+    captureBtn.style.display = "none";
+
+    var app = document.getElementById("app");
+    html2canvas(app, {
+      backgroundColor: null,
+      useCORS: true,
+      logging: false
+    }).then(function (canvas) {
+      canvas.toBlob(function (blob) {
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement("a");
+
+        // 파일명: steady99_명언_YYYYMMDD_HHMMSS.png
+        var now = new Date();
+        var year = now.getFullYear();
+        var month = String(now.getMonth() + 1).padStart(2, "0");
+        var date = String(now.getDate()).padStart(2, "0");
+        var hours = String(now.getHours()).padStart(2, "0");
+        var minutes = String(now.getMinutes()).padStart(2, "0");
+        var seconds = String(now.getSeconds()).padStart(2, "0");
+        var timestamp = year + month + date + "_" + hours + minutes + seconds;
+
+        link.href = url;
+        link.download = "steady99_명언_" + timestamp + ".png";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        showToast("캡처 저장 완료");
+
+        // 캡처 버튼 다시 표시
+        if (settings.showCapture) {
+          captureBtn.style.display = "block";
+        }
+      });
+    }).catch(function (err) {
+      showToast("캡처 실패");
+      if (settings.showCapture) {
+        captureBtn.style.display = "block";
+      }
+    });
+  }
+
+  // ── 즐겨찾기 카운트 업데이트 ───────────────
+  function updateFavoritesCount() {
+    var count = Object.keys(favorites).length;
+    if (count === 0) {
+      favoritesCount.textContent = "";
+    } else {
+      favoritesCount.textContent = "(" + count + "개)";
+    }
+  }
+
   shareBtn.addEventListener("click", function (e) {
     e.stopPropagation();
     shareQuote();
@@ -816,6 +1027,49 @@
     e.preventDefault();
     e.stopPropagation();
     shareQuote();
+  }, { passive: false });
+
+  // ── 하트 버튼 이벤트 ───────────────────────
+  heartBtn.addEventListener("click", function (e) {
+    e.stopPropagation();
+    var q = getCurrentQuote();
+    if (!q) return;
+    var added = toggleFavorite(q);
+    saveFavorites();
+    showHeartAnimation(added);
+    updateHeartIcon();
+    // 즐겨찾기 모드 중 해제 시 리빌드
+    if (settings.favoritesOnly && !added) {
+      rebuildFilteredQuotes();
+      fillLayer(activeLayer, current, isDark);
+      updateCounter();
+    }
+  });
+  heartBtn.addEventListener("touchstart", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var q = getCurrentQuote();
+    if (!q) return;
+    var added = toggleFavorite(q);
+    saveFavorites();
+    showHeartAnimation(added);
+    updateHeartIcon();
+    if (settings.favoritesOnly && !added) {
+      rebuildFilteredQuotes();
+      fillLayer(activeLayer, current, isDark);
+      updateCounter();
+    }
+  }, { passive: false });
+
+  // ── 캡처 버튼 이벤트 ───────────────────────
+  captureBtn.addEventListener("click", function (e) {
+    e.stopPropagation();
+    captureQuote();
+  });
+  captureBtn.addEventListener("touchstart", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    captureQuote();
   }, { passive: false });
 
   // ── 스와이프 감지 상태 ────────────────────
@@ -864,6 +1118,8 @@
       var added = toggleFavorite(q);
       saveFavorites();
       showHeartAnimation(added);
+      updateHeartIcon();
+      updateFavoritesCount();
       // 즐겨찾기 모드 중 해제 시 리빌드
       if (settings.favoritesOnly && !added) {
         rebuildFilteredQuotes();
@@ -991,6 +1247,10 @@
   applyClock();
   applyCounter();
   applyShare();
+  applyHeart();
+  applyCaptureBtn();
+  updateHeartIcon();
+  updateFavoritesCount();
   requestWakeLock();
   resetAutoTimer();
 })();
